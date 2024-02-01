@@ -5,6 +5,7 @@ import express from 'express'
 import { initialiseName } from './utils'
 import { ApplicationInfo } from '../applicationInfo'
 import config from '../config'
+import { HmppsError } from '../interfaces/hmppsError'
 
 const production = process.env.NODE_ENV === 'production'
 
@@ -43,4 +44,38 @@ export default function nunjucksSetup(app: express.Express, applicationInfo: App
   )
 
   njkEnv.addFilter('initialiseName', initialiseName)
+  njkEnv.addFilter(
+    'setSelected',
+    (items: { value: string; text: string }[], selected) =>
+      items &&
+      items.map(entry => ({
+        ...entry,
+        selected: entry && String(entry.value) === String(selected),
+      })),
+  )
+  njkEnv.addFilter('addDefaultSelectedValue', (items, text) => {
+    if (!items) return null
+
+    return [
+      {
+        text,
+        value: '',
+        selected: true,
+        attributes: {
+          hidden: 'hidden',
+        },
+      },
+      ...items,
+    ]
+  })
+  njkEnv.addFilter('findError', (errors: HmppsError[], formFieldId: string) => {
+    if (!errors) return null
+    const item = errors.find((error: HmppsError) => error.href === `#${formFieldId}`)
+    if (item) {
+      return {
+        text: item.text,
+      }
+    }
+    return null
+  })
 }

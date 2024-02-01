@@ -1,11 +1,57 @@
 {% extends "../partials/layout.njk" %}
+{%- from "moj/components/search/macro.njk" import mojSearch -%}
+{%- from "govuk/components/tag/macro.njk" import govukTag -%}
+{% from "govuk/components/input/macro.njk" import govukInput %}
 
 {% set pageTitle = applicationName + " - Home" %}
 {% set mainClasses = "app-container govuk-body" %}
 
 {% block content %}
 
-  <h1>This site is under construction...</h1>
-  <p>Please check back later when there is content to view.</p>
+  <h1>Case notes</h1>
+
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-one-quarter app-sidebar">
+      {% include '../partials/caseNotesFilter.njk' %}
+    </div>
+
+    <div class="govuk-grid-column-three-quarters">
+      <h2 class="govuk-heading-m">Search case notes
+        {{ govukTag({
+          text: "Beta"
+        }) }}
+      </h2>
+
+      <div class="govuk-grid-row">
+        <div class="govuk-grid-column-one-quarter">
+          {{ govukInput({
+            label: {
+              text: "Prison number",
+              classes: "govuk-label"
+            },
+            id: "prison-number",
+            name: "prisonNumber"
+          }) }}
+        </div>
+
+        <div class="govuk-grid-column-three-quarters">
+          {{ mojSearch({
+            action: '#',
+            method: 'post',
+            input: {
+              id: 'keywords',
+              name: 'keywords'
+            },
+            label: {
+              text: 'Keywords or phrase',
+              classes: 'govuk-label'
+            },
+            button: {
+              text: 'Search'
+            }
+          }) }}
+        </div>
+    </div>
+  </div>
 
 {% endblock %}
