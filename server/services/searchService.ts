@@ -1,20 +1,55 @@
 /* eslint-disable no-underscore-dangle */
 
 import type SearchClient from '../data/searchClient'
-import { TypeSearchAggregation } from '../interfaces/TypeSearch'
+import { CaseNote, SearchResponse, TypeSearchAggregation } from '../interfaces/TypeSearch'
 
 export type SearchTerms = {
   keywords: string
+  type?: string
+  subType?: string
 }
-
-export type SearchResponse = Record<string, unknown>
 
 export default class SearchService {
   constructor(private readonly searchClient: SearchClient) {}
 
-  // TODO: Implement search
-  // async search(searchTerms: SearchTerms): Promise<SearchResponse> {
-  // }
+  async search(searchTerms: SearchTerms): Promise<CaseNote[]> {
+    const query = {
+      query: {
+        bool: {
+          must: [
+            {
+              multi_match: {
+                query: searchTerms.keywords,
+                fields: ['additionalNoteText', 'authorName', 'caseNoteId', 'source', 'text'],
+                type: 'cross_fields',
+                operator: 'or',
+              },
+            },
+          ],
+        },
+      },
+    }
+
+    if (searchTerms.type) {
+      query.query.bool.must.push({
+        match: {
+          type: searchTerms.type,
+        },
+      })
+    }
+
+    if (searchTerms.subType) {
+      query.query.bool.must.push({
+        match: {
+          subType: searchTerms.subType,
+        },
+      })
+    }
+
+    const resp = await this.searchClient.searchCaseNotes<SearchResponse>(query)
+
+    return resp.hits.hits.map(rawRecord => rawRecord._source)
+  }
 
   async getAlertTypes(): Promise<{
     types: { value: string; text: string }[]

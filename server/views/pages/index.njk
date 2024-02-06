@@ -2,6 +2,8 @@
 {%- from "moj/components/search/macro.njk" import mojSearch -%}
 {%- from "govuk/components/tag/macro.njk" import govukTag -%}
 {% from "govuk/components/input/macro.njk" import govukInput %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+{% from "govuk/components/summary-list/macro.njk" import govukSummaryList %}
 
 {% set pageTitle = applicationName + " - Home" %}
 {% set mainClasses = "app-container govuk-body" %}
@@ -11,6 +13,7 @@
   <h1>Case notes</h1>
 
   <div class="govuk-grid-row">
+  <form method='get'>
     <div class="govuk-grid-column-one-quarter app-sidebar">
       {% include '../partials/caseNotesFilter.njk' %}
     </div>
@@ -30,27 +33,52 @@
               classes: "govuk-label"
             },
             id: "prison-number",
-            name: "prisonNumber"
+            name: "prisonNumber",
+            valie: queryItems.prisonNumber
           }) }}
         </div>
 
         <div class="govuk-grid-column-three-quarters">
-          {{ mojSearch({
-            method: 'get',
-            input: {
-              id: 'keywords',
-              name: 'keywords'
-            },
-            label: {
-              text: 'Keywords or phrase',
-              classes: 'govuk-label'
-            },
-            button: {
-              text: 'Search'
-            }
-          }) }}
+          <div class='govuk-grid-row'>
+            <div class='govuk-grid-column-three-quarters govuk-!-padding-right-0'>
+              <div class="govuk-form-group">
+                <label class="govuk-label" for="keywords">
+                  Keywords or phrase
+                </label>
+                <input class="govuk-input" id="keywords" name="keywords" type="text" value='{{ queryItems.keywords }}'>
+              </div>
+            </div>
+            <div class='govuk-grid-column-one-quarter '>
+              {{ govukButton({
+                text: "Search",
+                classes: "govuk-!-margin-top-6"
+              }) }}
+            </div>
+          </div>
         </div>
+      </div>
+
+
+      {% if searchResponse %}
+          {% for response in searchResponse %}
+            <div class="govuk-grid-row">
+              <div class="govuk-grid-column-full">
+                {{ govukSummaryList({
+                  card: {
+                    title: {
+                      text: "University of Gloucestershire"
+                    }
+                  },
+                  rows: response | toCaseNoteSummaryList
+                }) }}
+              </div>
+            </div>
+          {% endfor %}
+      {% endif %}
+
+
     </div>
+  </form>
   </div>
 
 {% endblock %}

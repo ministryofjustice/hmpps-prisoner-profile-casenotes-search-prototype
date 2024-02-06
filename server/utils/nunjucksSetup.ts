@@ -6,6 +6,7 @@ import { initialiseName } from './utils'
 import { ApplicationInfo } from '../applicationInfo'
 import config from '../config'
 import { HmppsError } from '../interfaces/hmppsError'
+import { CaseNote } from '../interfaces/TypeSearch'
 
 const production = process.env.NODE_ENV === 'production'
 
@@ -77,5 +78,14 @@ export default function nunjucksSetup(app: express.Express, applicationInfo: App
       }
     }
     return null
+  })
+
+  njkEnv.addFilter('toCaseNoteSummaryList', (casenote: CaseNote) => {
+    return Object.entries(casenote).map(([key, value]) => {
+      return {
+        key: { text: [key] },
+        value: { text: [value] },
+      }
+    })
   })
 }

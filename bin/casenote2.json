@@ -3,31 +3,31 @@
   "offenderIdentifier": "A8610DZ",
   "type": "ALERT",
   "typeDescription": "Alert",
-  "subType": "INACTIVE",
-  "subTypeDescription": "Made Inactive",
+  "subType": "VIOLENCE",
+  "subTypeDescription": "Violence",
   "source": "AUTO",
-  "creationDateTime": "2024-01-19T11:10:17.031266",
-  "occurrenceDateTime": "2024-01-19T00:00:00",
-  "authorName": "Williams, Nick",
-  "authorUserId": "487520",
-  "text": "Alert COVID unit management and Refusing to shield made active 2.",
-  "locationId": "MDI",
+  "creationDateTime": "2023-09-30T11:10:17.031266",
+  "occurrenceDateTime": "2023-09-30T09:00:00.000000",
+  "authorName": "Whitfield, Matt",
+  "authorUserId": "123456",
+  "text": "A violent act against a prison officer.",
+  "locationId": "LEI",
   "eventId": 47033210,
   "sensitive": false,
   "amendments": [
     {
       "creationDateTime": "2024-12-20T18:06:16",
-      "authorName": "Williams, Nick",
+      "authorName": "Whitfield, Matt",
       "additionalNoteText": "abc"
     },
     {
       "creationDateTime": "2024-12-20T18:06:30",
-      "authorName": "Williams, Nick",
+      "authorName": "Whitfield, Matt",
       "additionalNoteText": "def"
     },
     {
       "creationDateTime": "2024-12-20T18:08:08",
-      "authorName": "Williams, Nick",
+      "authorName": "Whitfield, Matt",
       "additionalNoteText": "aaa\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\nbbb"
     }
   ]

@@ -50,15 +50,7 @@ interface TypeBucket {
   typeDescriptions: TypeDescriptions
 }
 
-export interface TypeSearchAggregation {
-  took: number
-  timed_out: boolean
-  _shards: {
-    total: number
-    successful: number
-    skipped: number
-    failed: number
-  }
+export interface TypeSearchAggregation extends SearchResponse {
   hits: {
     total: {
       value: number
@@ -79,4 +71,55 @@ export interface TypeSearchAggregation {
       buckets: TypeBucket[]
     }
   }
+}
+
+export type SearchResponse = {
+  took: number
+  timed_out: boolean
+  _shards: {
+    total: number
+    successful: number
+    skipped: number
+    failed: number
+  }
+  hits: {
+    total: {
+      value: number
+      relation: string
+    }
+    max_score: null
+    hits: CaseNoteSearchResponse[]
+  }
+}
+
+interface Amendment {
+  creationDateTime: string
+  authorName: string
+  additionalNoteText: string
+}
+
+export interface CaseNote {
+  caseNoteId: string
+  offenderIdentifier: string
+  type: string
+  typeDescription: string
+  subType: string
+  subTypeDescription: string
+  source: string
+  creationDateTime: string
+  occurrenceDateTime: string
+  authorName: string
+  authorUserId: string
+  text: string
+  locationId: string
+  eventId: number
+  sensitive: boolean
+  amendments: Amendment[]
+}
+
+interface CaseNoteSearchResponse {
+  _index: string
+  _id: string
+  _score: number
+  _source: CaseNote
 }

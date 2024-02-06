@@ -1,62 +1,65 @@
 {% from "govuk/components/input/macro.njk" import govukInput %}
 {% from "govuk/components/select/macro.njk" import govukSelect %}
-{% from '../macros/hmppsSideFilter.njk' import hmppsSideFilter %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+
 {% from '../components/datepicker/macro.njk' import hmppsDatepicker %}
-{% set options = {
-    title: 'Filter',
-    id: 'caseNotesFilter',
-    currentUrlPath: currentUrlPath,
-    queryParams: listMetadata.filtering.queryParams
-} %}
-{%- call hmppsSideFilter(options) -%}
-    <div class="govuk-form-group">
-        {{ govukSelect({
-            id: "type",
-            name: "type",
-            label: {
-                text: "Type"
-            },
-            items: alertTypes.types | addDefaultSelectedValue('Choose type') | setSelected(null)
+    <div class="hmpps-side-filter" id="caseNotesFilter">
+        <h2 class="hmpps-side-filter__header">Filter</h2>
+
+        <div class="hmpps-side-filter__content">
+            <div class="govuk-form-group">
+                {{ govukSelect({
+                    id: "type",
+                    name: "type",
+                    label: {
+                        text: "Type"
+                    },
+                    items: alertTypes.types | addDefaultSelectedValue('Choose type') | setSelected(queryItems.type)
+                }) }}
+                {{ govukSelect({
+                    id: "subType",
+                    name: "subType",
+                    label: {
+                        text: "Sub-type"
+                    },
+                    items: alertTypes.subTypes | addDefaultSelectedValue('Choose sub-type') | setSelected(queryItems.subType)
+                }) }}
+                {{ hmppsDatepicker({
+                    id: "startDate",
+                    name: "startDate",
+                    label: {
+                        text: "Date from (earliest)",
+                        classes: "govuk-label--m"
+                    },
+                    hint: {
+                        text: "For example, 31/3/2022"
+                    },
+                    errorMessage: errors | findError('startDate'),
+                    value: queryItems.startDate
+                }) }}
+                {{ hmppsDatepicker({
+                    id: "endDate",
+                    name: "endDate",
+                    label: {
+                        text: "Date to (latest)",
+                        classes: "govuk-label--m"
+                    },
+                    hint: {
+                        text: "For example, 31/3/2023"
+                    },
+                    errorMessage: errors | findError('endDate'),
+                    value: queryItems.endDate
+                }) }}
+            </div>
+        </div>
+        {{ govukButton({
+            text: "Apply",
+            preventDoubleClick: true,
+            attributes: { "data-qa": "apply-filter-button" }
         }) }}
-        {{ govukSelect({
-            id: "subType",
-            name: "subType",
-            label: {
-                text: "Sub-type"
-            },
-            items: alertTypes.subTypes | addDefaultSelectedValue('Choose sub-type') | setSelected(null)
-        }) }}
-        {{ hmppsDatepicker({
-            id: "startDate",
-            name: "startDate",
-            label: {
-                text: "Date from (earliest)",
-                classes: "govuk-label--m"
-            },
-            hint: {
-                text: "For example, 31/3/2022"
-            },
-            errorMessage: errors | findError('startDate'),
-            value: listMetadata.filtering.startDate
-        }) }}
-        {{ hmppsDatepicker({
-            id: "endDate",
-            name: "endDate",
-            label: {
-                text: "Date to (latest)",
-                classes: "govuk-label--m"
-            },
-            hint: {
-                text: "For example, 31/3/2023"
-            },
-            errorMessage: errors | findError('endDate'),
-            value: listMetadata.filtering.endDate
-        }) }}
-    </div>
-{%- endcall -%}
+</div>
 
 {% block pageScripts %}
-    <script id="typeData" type="application/json">{{ typeSubTypeMap | dump | safe }}</script>
     <script src="/assets/js/caseNotes.js"></script>
     <script src="/assets/js/datepicker.js"></script>
 {% endblock %}
