@@ -8,8 +8,11 @@ export default function routes(service: Services): Router {
   const router = Router()
   const get = (path: string | string[], handler: RequestHandler) => router.get(path, asyncMiddleware(handler))
 
-  get('/', (req, res, next) => {
-    res.render('pages/index')
+  get('/', async (req, res, next) => {
+    // const searchResponse = req.query.keywords ? await service.searchService.search(req.query as SearchTerms) : null
+    const alertTypes = await service.searchService.getAlertTypes()
+
+    res.render('pages/index', { searchResponse: [], alertTypes })
   })
 
   return router
