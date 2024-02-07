@@ -11,6 +11,7 @@ export default function routes(service: Services): Router {
 
   get('/', async (req, res, next) => {
     const searchResponse = req.query.keywords ? await service.searchService.search(req.query as SearchTerms) : null
+    console.log(searchResponse)
     const alertTypes = await service.searchService.getAlertTypes()
 
     res.render('pages/index', { searchResponse, alertTypes, queryItems: req.query })

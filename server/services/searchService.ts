@@ -7,6 +7,14 @@ export type SearchTerms = {
   keywords: string
   type?: string
   subType?: string
+  startDate?: string
+  endDate?: string
+}
+
+function convertToISO(dateString: string) {
+  const [day, month, year] = dateString.split('/')
+  const date = new Date(`${year}-${month}-${day}`)
+  return date.toISOString()
 }
 
 export default class SearchService {
@@ -16,7 +24,7 @@ export default class SearchService {
     const query = {
       query: {
         bool: {
-          must: [
+          should: [
             {
               multi_match: {
                 query: searchTerms.keywords,
@@ -25,30 +33,84 @@ export default class SearchService {
                 operator: 'or',
               },
             },
+            {
+              nested: {
+                path: 'amendments',
+                query: {
+                  match: {
+                    'amendments.additionalNoteText': {
+                      query: searchTerms.keywords,
+                      fuzziness: 'AUTO',
+                    },
+                  },
+                },
+              },
+            },
           ],
+          minimum_should_match: '1',
+          filter: this.getFilters(searchTerms),
+        },
+      },
+      size: 3,
+      highlight: {
+        fields: {
+          text: {},
+          'amendments.additionalNoteText': {},
         },
       },
     }
 
+    console.log(query)
+
+    const resp = await this.searchClient.searchCaseNotes<SearchResponse>(query)
+
+    return resp.hits.hits.map(rawRecord => rawRecord._source)
+  }
+
+  getFilters(searchTerms: SearchTerms) {
+    const filterQuery = []
+
     if (searchTerms.type) {
-      query.query.bool.must.push({
-        match: {
-          type: searchTerms.type,
+      filterQuery.push({
+        term: {
+          'type.keyword': searchTerms.type,
         },
       })
     }
 
     if (searchTerms.subType) {
-      query.query.bool.must.push({
-        match: {
-          subType: searchTerms.subType,
+      filterQuery.push({
+        term: {
+          'subType.keyword': searchTerms.subType,
         },
       })
     }
 
-    const resp = await this.searchClient.searchCaseNotes<SearchResponse>(query)
+    let dateRange = {}
 
-    return resp.hits.hits.map(rawRecord => rawRecord._source)
+    if (searchTerms.startDate) {
+      dateRange = {
+        ...dateRange,
+        gte: convertToISO(searchTerms.startDate),
+      }
+    }
+
+    if (searchTerms.endDate) {
+      dateRange = {
+        ...dateRange,
+        lte: convertToISO(searchTerms.endDate),
+      }
+    }
+
+    if (searchTerms.startDate || searchTerms.endDate) {
+      filterQuery.push({
+        range: {
+          creationDateTime: dateRange,
+        },
+      })
+    }
+
+    return filterQuery
   }
 
   async getAlertTypes(): Promise<{

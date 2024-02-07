@@ -1,0 +1,54 @@
+{
+  "caseNoteId": "57033215",
+  "offenderIdentifier": "A8610DZ",
+  "type": "APP",
+  "typeDescription": "Appointment",
+  "subType": "OUTCOME",
+  "subTypeDescription": "Outcome of Schedule",
+  "source": "AUTO",
+  "creationDateTime": "2024-02-19T11:11:17.031266",
+  "occurrenceDateTime": "2024-02-19T11:00:00",
+  "authorName": "Williams, Nick",
+  "authorUserId": "487520",
+  "text": "have arranged and appoinmtne to discuss recent aggresive behaviour and staff abuse. ",
+  "locationId": "MDI",
+  "eventId": 47033210,
+  "sensitive": false,
+  "amendments": [
+    {
+      "creationDateTime": "2024-03-20T18:06:16",
+      "authorName": "Williams, Nick",
+      "additionalNoteText": "UTI incidents have esclatedto a daily occirance and will lead to MDT for 6 months. Need ACCt involement."
+    },
+    {
+      "creationDateTime": "2024-04-20T18:06:30",
+      "authorName": "Williams, Nick",
+      "additionalNoteText": "threats to satff have reduced over time period, but dperesison and paranoia and selg harm have increased. "
+    },
+    {
+      "creationDateTime": "2024-05-20T18:08:08",
+      "authorName": "Williams, Nick",
+      "additionalNoteText": "Continuing bad behaviour has lead to remval of iep. Recent visit from father and sister."
+    },
+    {
+      "creationDateTime": "2024-06-20T18:08:08",
+      "authorName": "Williams, Nick",
+      "additionalNoteText": "positive good iep aggressive adjutication challenged complaince"
+    },
+    {
+      "creationDateTime": "2024-07-20T18:08:08",
+      "authorName": "Williams, Nick",
+      "additionalNoteText": "negativ behaviour IEP wanbring avusive DDP isolation rection"
+    },
+    {
+      "creationDateTime": "2024-07-20T18:08:08",
+      "authorName": "Williams, Nick",
+      "additionalNoteText": "poor behaviourt iep wanrning viuolane tbehaviour thrteats to staff uti coping concerns"
+    },
+    {
+      "creationDateTime": "2024-07-20T18:08:08",
+      "authorName": "Williams, Nick",
+      "additionalNoteText": "acct ddp sotp iep mdt uti omu ppu"
+    }
+  ]
+}
