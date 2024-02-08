@@ -58,7 +58,13 @@ export default class SearchService {
       },
       size: 3,
       highlight: {
+        pre_tags: ["<em class='search-highlight'>"],
+        post_tags: ['</em>'],
         fields: {
+          additionalNoteText: {},
+          authorName: {},
+          caseNoteId: {},
+          source: {},
           text: {},
           'amendments.additionalNoteText': {},
         },
@@ -67,7 +73,9 @@ export default class SearchService {
 
     const resp = await this.searchClient.searchCaseNotes<SearchResponse>(query)
 
-    return resp.hits.hits.map(rawRecord => rawRecord._source)
+    return resp.hits.hits.map(rawRecord => {
+      return { ...rawRecord._source, ...rawRecord.highlight }
+    })
   }
 
   getFilters(searchTerms: SearchTerms) {

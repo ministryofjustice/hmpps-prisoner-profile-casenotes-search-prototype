@@ -2,6 +2,7 @@
 import path from 'path'
 import nunjucks from 'nunjucks'
 import express from 'express'
+import { format, parseISO } from 'date-fns'
 import { initialiseName } from './utils'
 import { ApplicationInfo } from '../applicationInfo'
 import config from '../config'
@@ -121,7 +122,7 @@ export default function nunjucksSetup(app: express.Express, applicationInfo: App
         return {
           key: { text: keyMapper[key as keyof CaseNote] },
           value: {
-            text: key === 'creationDateTime' || key === 'occurrenceDateTime' ? formatDate(value) : String([value]),
+            html: key === 'creationDateTime' || key === 'occurrenceDateTime' ? formatDate(value) : String([value]),
           },
         }
       })
@@ -138,17 +139,11 @@ export default function nunjucksSetup(app: express.Express, applicationInfo: App
 }
 
 function formatDate(isoDateString: string) {
-  const date = new Date(isoDateString)
-  const day = String(date.getDate()).padStart(2, '0')
-  const month = String(date.getMonth() + 1).padStart(2, '0') // Months are 0-based in JavaScript
-  const year = date.getFullYear()
-  const hours = String(date.getHours()).padStart(2, '0')
-  const minutes = String(date.getMinutes()).padStart(2, '0')
-
-  return `${day}/${month}/${year} - ${hours}:${minutes}`
+  const date = parseISO(isoDateString)
+  return format(date, "iiii dd MMMM yyyy 'at' HH:mm")
 }
 
-type SummaryListItem = { key: { text: string }; value: { text: string } }
+type SummaryListItem = { key: { text: string }; value: { html: string } }
 
 const keyMapper: Record<keyof CaseNote, string> = {
   caseNoteId: 'ID',
@@ -162,7 +157,7 @@ const keyMapper: Record<keyof CaseNote, string> = {
   authorName: 'Author name',
   authorUserId: 'Author user id',
   creationDateTime: 'Creation date time',
-  occurrenceDateTime: 'Occurrence date',
+  occurrenceDateTime: 'Happened',
   locationId: 'Location ID',
   source: 'Source',
   text: 'Case note',
