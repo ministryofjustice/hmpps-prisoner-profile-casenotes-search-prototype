@@ -11,3 +11,14 @@ $govuk-page-width: $moj-page-width;
 @import './components/hmpps-side-filter';
 @import './components/date-picker';
 @import 'assets/scss/local';
+
+.panel-header {
+  width: 100%;
+
+  div {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+}
+

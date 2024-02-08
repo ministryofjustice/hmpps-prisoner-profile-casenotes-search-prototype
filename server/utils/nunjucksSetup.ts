@@ -80,12 +80,93 @@ export default function nunjucksSetup(app: express.Express, applicationInfo: App
     return null
   })
 
-  njkEnv.addFilter('toCaseNoteSummaryList', (casenote: CaseNote) => {
-    return Object.entries(casenote).map(([key, value]) => {
-      return {
-        key: { text: [key] },
-        value: { text: [value] },
-      }
-    })
+  njkEnv.addFilter('toCaseNoteSummaryList', (casenote: CaseNote): SummaryListItem[] => {
+    return Object.entries(casenote)
+      .map(([key, value]) => {
+        if (
+          key === 'subType' ||
+          key === 'caseNoteId' ||
+          key === 'authorUserId' ||
+          key === 'eventId' ||
+          key === 'source' ||
+          key === 'creationDateTime' ||
+          key === 'authorName' ||
+          key === 'subTypeDescription' ||
+          key === 'typeDescription' ||
+          key === 'type'
+        )
+          return null
+
+        if (key === 'amendments') {
+          return {
+            key: { text: keyMapper[key as keyof CaseNote] },
+            value: {
+              html: (value as CaseNote['amendments'])
+                .map(amendment => {
+                  return `<details class='govuk-details govuk-!-margin-bottom-1'>
+                            <summary class='govuk-details__summary'>
+                              <span class='govuk-details__summary-text'>
+                                 ${amendment.additionalNoteText}
+                              </span>
+                            </summary>
+                            <div class='govuk-details__text'>
+                              ${amendment.authorName} - ${formatDate(amendment.creationDateTime)} <br /><br />
+                              ${amendment.additionalNoteText}
+                            </div>
+                          </details>`
+                })
+                .join(''),
+            },
+          }
+        }
+
+        return {
+          key: { text: keyMapper[key as keyof CaseNote] },
+          value: {
+            text: key === 'creationDateTime' || key === 'occurrenceDateTime' ? formatDate(value) : String([value]),
+          },
+        }
+      })
+      .filter(Boolean)
+      .sort((a, b) => {
+        // bring 'text' key to the top
+        if (a.key.text === keyMapper.text) return -1
+        if (a.key.text === keyMapper.occurrenceDateTime) return -1
+        return 0
+      })
   })
+
+  njkEnv.addFilter('formatDateTime', formatDate)
+}
+
+function formatDate(isoDateString: string) {
+  const date = new Date(isoDateString)
+  const day = String(date.getDate()).padStart(2, '0')
+  const month = String(date.getMonth() + 1).padStart(2, '0') // Months are 0-based in JavaScript
+  const year = date.getFullYear()
+  const hours = String(date.getHours()).padStart(2, '0')
+  const minutes = String(date.getMinutes()).padStart(2, '0')
+
+  return `${day}/${month}/${year} - ${hours}:${minutes}`
+}
+
+type SummaryListItem = { key: { text: string }; value: { text: string } }
+
+const keyMapper: Record<keyof CaseNote, string> = {
+  caseNoteId: 'ID',
+  offenderIdentifier: 'Offender ID',
+  eventId: 'Event ID',
+  sensitive: 'Sensitive',
+  type: 'Type',
+  subType: 'Sub type',
+  typeDescription: 'Type description',
+  subTypeDescription: 'Sub type description',
+  authorName: 'Author name',
+  authorUserId: 'Author user id',
+  creationDateTime: 'Creation date time',
+  occurrenceDateTime: 'Occurrence date',
+  locationId: 'Location ID',
+  source: 'Source',
+  text: 'Case note',
+  amendments: 'Amendments',
 }
