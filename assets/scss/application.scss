@@ -20,5 +20,9 @@ $govuk-page-width: $moj-page-width;
     justify-content: space-between;
     align-items: center;
   }
+
+  .govuk-tag {
+    max-width: none;
+  }
 }
 

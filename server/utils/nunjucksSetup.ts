@@ -62,9 +62,6 @@ export default function nunjucksSetup(app: express.Express, applicationInfo: App
         text,
         value: '',
         selected: true,
-        attributes: {
-          hidden: 'hidden',
-        },
       },
       ...items,
     ]
@@ -93,7 +90,8 @@ export default function nunjucksSetup(app: express.Express, applicationInfo: App
           key === 'authorName' ||
           key === 'subTypeDescription' ||
           key === 'typeDescription' ||
-          key === 'type'
+          key === 'type' ||
+          key === 'offenderIdentifier'
         )
           return null
 

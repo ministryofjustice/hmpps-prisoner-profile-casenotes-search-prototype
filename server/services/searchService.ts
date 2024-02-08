@@ -5,6 +5,7 @@ import { CaseNote, SearchResponse, TypeSearchAggregation } from '../interfaces/T
 
 export type SearchTerms = {
   keywords: string
+  prisonNumber: string
   type?: string
   subType?: string
   startDate?: string
@@ -21,33 +22,37 @@ export default class SearchService {
   constructor(private readonly searchClient: SearchClient) {}
 
   async search(searchTerms: SearchTerms): Promise<CaseNote[]> {
-    const query = {
-      query: {
-        bool: {
-          should: [
-            {
-              multi_match: {
-                query: searchTerms.keywords,
-                fields: ['additionalNoteText', 'authorName', 'caseNoteId', 'source', 'text'],
-                type: 'cross_fields',
-                operator: 'or',
-              },
+    const shouldQuery = searchTerms.keywords
+      ? [
+          {
+            multi_match: {
+              query: searchTerms.keywords,
+              fields: ['additionalNoteText', 'authorName', 'caseNoteId', 'source', 'text'],
+              type: 'cross_fields',
+              operator: 'or',
             },
-            {
-              nested: {
-                path: 'amendments',
-                query: {
-                  match: {
-                    'amendments.additionalNoteText': {
-                      query: searchTerms.keywords,
-                      fuzziness: 'AUTO',
-                    },
+          },
+          {
+            nested: {
+              path: 'amendments',
+              query: {
+                match: {
+                  'amendments.additionalNoteText': {
+                    query: searchTerms.keywords,
+                    fuzziness: 'AUTO',
                   },
                 },
               },
             },
-          ],
-          minimum_should_match: '1',
+          },
+        ]
+      : []
+
+    const query = {
+      query: {
+        bool: {
+          should: shouldQuery,
+          minimum_should_match: searchTerms.keywords ? '1' : '0',
           filter: this.getFilters(searchTerms),
         },
       },
@@ -60,8 +65,6 @@ export default class SearchService {
       },
     }
 
-    console.log(query)
-
     const resp = await this.searchClient.searchCaseNotes<SearchResponse>(query)
 
     return resp.hits.hits.map(rawRecord => rawRecord._source)
@@ -69,6 +72,12 @@ export default class SearchService {
 
   getFilters(searchTerms: SearchTerms) {
     const filterQuery = []
+
+    filterQuery.push({
+      match: {
+        offenderIdentifier: searchTerms.prisonNumber,
+      },
+    })
 
     if (searchTerms.type) {
       filterQuery.push({
