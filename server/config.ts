@@ -87,9 +87,9 @@ export default {
       enabled: get('TOKEN_VERIFICATION_ENABLED', 'false') === 'true',
     },
     opensearch: {
-      url: get('OPENSEARCH_HOST', 'https://localhost:9200/casenotes/_search?pretty=true', requiredInProduction),
-      username: get('OPENSEARCH_USERNAME', 'admin', requiredInProduction),
-      password: get('OPENSEARCH_PASSWORD', 'admin', requiredInProduction),
+      url: get('OPENSEARCH_HOST', 'https://localhost:9200', requiredInProduction),
+      username: get('OPENSEARCH_USERNAME', 'admin'),
+      password: get('OPENSEARCH_PASSWORD', 'admin'),
       timeout: {
         response: Number(get('HMPPS_AUTH_TIMEOUT_RESPONSE', 10000)),
         deadline: Number(get('HMPPS_AUTH_TIMEOUT_DEADLINE', 10000)),

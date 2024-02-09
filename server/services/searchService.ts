@@ -30,6 +30,7 @@ export default class SearchService {
               fields: ['additionalNoteText', 'authorName', 'caseNoteId', 'source', 'text'],
               type: 'cross_fields',
               operator: 'or',
+              analyzer: 'case_notes_search_analyzer',
             },
           },
           {
@@ -40,6 +41,7 @@ export default class SearchService {
                   'amendments.additionalNoteText': {
                     query: searchTerms.keywords,
                     fuzziness: 'AUTO',
+                    analyzer: 'case_notes_search_analyzer',
                   },
                 },
               },
