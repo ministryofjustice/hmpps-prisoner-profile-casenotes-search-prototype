@@ -1,0 +1,29 @@
+{
+  "caseNoteId": "57033209",
+  "offenderIdentifier": "A8610DZ",
+  "type": "ALERT",
+  "typeDescription": "Alert",
+  "subType": "VIOLENCE",
+  "subTypeDescription": "Violence",
+  "source": "AUTO",
+  "creationDateTime": "2023-09-30T11:10:17.031266",
+  "occurrenceDateTime": "2023-09-30T09:00:00.000000",
+  "authorName": "Whitfield, Matt",
+  "authorUserId": "123456",
+  "text": "A violent act against a prison officer.",
+  "locationId": "LEI",
+  "eventId": 47033210,
+  "sensitive": false,
+  "amendments": [
+    {
+      "creationDateTime": "2024-12-20T18:06:16",
+      "authorName": "Whitfield, Matt",
+      "additionalNoteText": "The act committed was a punch to the face."
+    },
+    {
+      "creationDateTime": "2024-12-20T18:06:30",
+      "authorName": "Whitfield, Matt",
+      "additionalNoteText": "The punch was a retaliation to the officer's unprofessional actions."
+    }
+  ]
+}

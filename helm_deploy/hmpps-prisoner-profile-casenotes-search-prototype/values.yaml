@@ -52,6 +52,8 @@ generic-service:
     elasticache-redis:
       REDIS_HOST: "primary_endpoint_address"
       REDIS_AUTH_TOKEN: "auth_token"
+    opensearch:
+      OPENSEARCH_HOST: "url"
 
   allowlist:
     groups:

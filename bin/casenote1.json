@@ -1,0 +1,34 @@
+{
+  "caseNoteId": "47033209",
+  "offenderIdentifier": "A8610DZ",
+  "type": "ALERT",
+  "typeDescription": "Alert",
+  "subType": "ACTIVE",
+  "subTypeDescription": "Made Active",
+  "source": "AUTO",
+  "creationDateTime": "2023-12-19T11:10:17.031266",
+  "occurrenceDateTime": "2023-12-19T00:00:00",
+  "authorName": "Williams, Nick",
+  "authorUserId": "487520",
+  "text": "Alert COVID unit management and Refusing to shield made active.",
+  "locationId": "MDI",
+  "eventId": 47033209,
+  "sensitive": false,
+  "amendments": [
+    {
+      "creationDateTime": "2023-12-20T18:06:16",
+      "authorName": "Williams, Nick",
+      "additionalNoteText": "abc"
+    },
+    {
+      "creationDateTime": "2023-12-20T18:06:30",
+      "authorName": "Williams, Nick",
+      "additionalNoteText": "def"
+    },
+    {
+      "creationDateTime": "2023-12-20T18:08:08",
+      "authorName": "Williams, Nick",
+      "additionalNoteText": "aaa\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\nbbb"
+    }
+  ]
+}

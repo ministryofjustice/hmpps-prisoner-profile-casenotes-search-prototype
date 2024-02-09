@@ -32,6 +32,8 @@ export interface ApiConfig {
     deadline: number
   }
   agent: AgentConfig
+  username?: string
+  password?: string
 }
 
 export default {
@@ -83,6 +85,16 @@ export default {
       },
       agent: new AgentConfig(Number(get('TOKEN_VERIFICATION_API_TIMEOUT_RESPONSE', 5000))),
       enabled: get('TOKEN_VERIFICATION_ENABLED', 'false') === 'true',
+    },
+    opensearch: {
+      url: get('OPENSEARCH_HOST', 'https://localhost:9200', requiredInProduction),
+      username: get('OPENSEARCH_USERNAME', 'admin'),
+      password: get('OPENSEARCH_PASSWORD', 'admin'),
+      timeout: {
+        response: Number(get('HMPPS_AUTH_TIMEOUT_RESPONSE', 10000)),
+        deadline: Number(get('HMPPS_AUTH_TIMEOUT_DEADLINE', 10000)),
+      },
+      agent: new AgentConfig(Number(get('MANAGE_USERS_API_TIMEOUT_RESPONSE', 10000))),
     },
   },
   domain: get('INGRESS_URL', 'http://localhost:3000', requiredInProduction),
