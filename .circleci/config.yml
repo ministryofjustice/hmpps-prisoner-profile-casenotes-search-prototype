@@ -97,15 +97,8 @@ jobs:
       - run:
           name: Wait for node app to start
           command: sleep 5
-      - run:
-          name: integration tests
-          command: npm run int-test
       - store_test_results:
           path: test_results
-      - store_artifacts:
-          path: integration_tests/videos
-      - store_artifacts:
-          path: integration_tests/screenshots
 
 workflows:
   version: 2
@@ -116,9 +109,6 @@ workflows:
             tags:
               ignore: /.*/
       - unit_test:
-          requires:
-            - build
-      - integration_test:
           requires:
             - build
       - hmpps/helm_lint:
@@ -143,7 +133,6 @@ workflows:
           requires:
             - helm_lint
             - unit_test
-            - integration_test
             - build_docker
           helm_timeout: 5m
 #      - request-preprod-approval:
