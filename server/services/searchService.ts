@@ -78,7 +78,9 @@ export default class SearchService {
     // create new object by converting values of rawRecord.highlight to string
 
     return resp.hits.hits.map(rawRecord => {
-      const highlights = Object.fromEntries(Object.entries(rawRecord.highlight).map(([key, value]) => [key, value[0]]))
+      const highlights = rawRecord.highlight
+        ? Object.fromEntries(Object.entries(rawRecord.highlight).map(([key, value]) => [key, value[0]]))
+        : {}
       return { ...rawRecord._source, ...highlights }
     })
   }
