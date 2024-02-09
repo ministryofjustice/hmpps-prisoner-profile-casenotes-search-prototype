@@ -75,8 +75,11 @@ export default class SearchService {
 
     const resp = await this.searchClient.searchCaseNotes<SearchResponse>(query)
 
+    // create new object by converting values of rawRecord.highlight to string
+
     return resp.hits.hits.map(rawRecord => {
-      return { ...rawRecord._source, ...rawRecord.highlight }
+      const highlights = Object.fromEntries(Object.entries(rawRecord.highlight).map(([key, value]) => [key, value[0]]))
+      return { ...rawRecord._source, ...highlights }
     })
   }
 

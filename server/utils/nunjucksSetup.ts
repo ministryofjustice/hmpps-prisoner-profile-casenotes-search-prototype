@@ -127,7 +127,7 @@ export default function nunjucksSetup(app: express.Express, applicationInfo: App
         }
       })
       .filter(Boolean)
-      .sort((a, b) => {
+      .sort(a => {
         // bring 'text' key to the top
         if (a.key.text === keyMapper.text) return -1
         if (a.key.text === keyMapper.occurrenceDateTime) return -1

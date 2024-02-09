@@ -117,9 +117,14 @@ export interface CaseNote {
   amendments: Amendment[]
 }
 
+export interface Highlight {
+  text: string[]
+}
+
 interface CaseNoteSearchResponse {
   _index: string
   _id: string
   _score: number
   _source: CaseNote
+  highlight: Highlight
 }
