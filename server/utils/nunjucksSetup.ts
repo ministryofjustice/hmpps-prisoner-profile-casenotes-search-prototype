@@ -92,7 +92,8 @@ export default function nunjucksSetup(app: express.Express, applicationInfo: App
           key === 'subTypeDescription' ||
           key === 'typeDescription' ||
           key === 'type' ||
-          key === 'offenderIdentifier'
+          key === 'offenderIdentifier' ||
+          key === 'sensitive'
         )
           return null
 
@@ -102,10 +103,15 @@ export default function nunjucksSetup(app: express.Express, applicationInfo: App
             value: {
               html: (value as CaseNote['amendments'])
                 .map(amendment => {
+                  const truncatedText =
+                    amendment.additionalNoteText.length > 150
+                      ? `${amendment.additionalNoteText.slice(0, 150)}...`
+                      : amendment.additionalNoteText
+
                   return `<details class='govuk-details govuk-!-margin-bottom-1'>
                             <summary class='govuk-details__summary'>
                               <span class='govuk-details__summary-text'>
-                                 ${amendment.additionalNoteText}
+                                 ${truncatedText}
                               </span>
                             </summary>
                             <div class='govuk-details__text'>
