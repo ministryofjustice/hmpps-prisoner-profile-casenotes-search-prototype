@@ -30,7 +30,6 @@ export default class SearchService {
               fields: ['additionalNoteText', 'authorName', 'caseNoteId', 'source', 'text'],
               type: 'cross_fields',
               operator: 'or',
-              fuzziness: 'AUTO',
               analyzer: 'case_notes_search_analyzer',
             },
           },
