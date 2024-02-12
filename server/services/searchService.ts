@@ -28,7 +28,8 @@ export default class SearchService {
             multi_match: {
               query: searchTerms.keywords,
               fields: ['additionalNoteText', 'authorName', 'caseNoteId', 'source', 'text'],
-              type: 'cross_fields',
+              type: 'best_fields',
+              fuzziness: 'AUTO',
               operator: 'or',
               analyzer: 'case_notes_search_analyzer',
             },
