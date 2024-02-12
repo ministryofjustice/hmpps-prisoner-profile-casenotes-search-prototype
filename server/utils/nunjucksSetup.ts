@@ -104,8 +104,8 @@ export default function nunjucksSetup(app: express.Express, applicationInfo: App
               html: (value as CaseNote['amendments'])
                 .map(amendment => {
                   const truncatedText =
-                    amendment.additionalNoteText.length > 150
-                      ? `${amendment.additionalNoteText.slice(0, 150)}...`
+                    amendment.additionalNoteText.length > 120
+                      ? `${amendment.additionalNoteText.slice(0, 120)}...`
                       : amendment.additionalNoteText
 
                   return `<details class='govuk-details govuk-!-margin-bottom-1'>
