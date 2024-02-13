@@ -12,7 +12,7 @@ export default class SearchClient {
   searchCaseNotes<T>(query: Record<string, unknown>): Promise<T> {
     logger.info('Getting casenotes details: calling Casenotes search')
     return SearchClient.restClient().get<T>({
-      path: '/casenotes2/_search',
+      path: '/casenotes/_search',
       data: query,
     })
   }
