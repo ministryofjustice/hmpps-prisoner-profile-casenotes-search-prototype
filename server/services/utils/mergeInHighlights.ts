@@ -6,6 +6,17 @@ export const HIGHLIGHT_CLOSE_TAG = '</em>'
 
 const highlightTag = new RegExp(HIGHLIGHT_TAG, 'g')
 const highlightCloseTag = new RegExp(HIGHLIGHT_CLOSE_TAG, 'g')
+
+function getNewText(originalText: string, highlights: string[]) {
+  if (!highlights.length) return originalText
+  const [highlight, ...rest] = highlights
+
+  const strippedTags = highlight.replace(highlightTag, '').replace(highlightCloseTag, '')
+  const replacedText = originalText.replace(strippedTags, highlight)
+
+  return getNewText(replacedText, rest)
+}
+
 export default function mergeInHighlights(searchResponse: SearchResponse) {
   return searchResponse.hits.hits.map(rawRecord => {
     const allHighlights = rawRecord.highlight
@@ -15,16 +26,13 @@ export default function mergeInHighlights(searchResponse: SearchResponse) {
 
     return Object.entries(allHighlights).reduce((acc, [key, highlightsForKey]: [HighlightKey, string[]]) => {
       if (key === 'amendments.additionalNoteText') {
-        return acc
-      }
-      function getNewText(originalText: string, highlights: string[]) {
-        if (!highlights.length) return originalText
-        const [highlight, ...rest] = highlights
-
-        const strippedTags = highlight.replace(highlightTag, '').replace(highlightCloseTag, '')
-        const replacedText = originalText.replace(strippedTags, highlight)
-
-        return getNewText(replacedText, rest)
+        return {
+          ...acc,
+          amendments: acc.amendments.map(amendment => ({
+            ...amendment,
+            additionalNoteText: getNewText(amendment.additionalNoteText, highlightsForKey),
+          })),
+        }
       }
 
       return { ...acc, [key]: getNewText(caseNote[key] as string, highlightsForKey ?? []) }
