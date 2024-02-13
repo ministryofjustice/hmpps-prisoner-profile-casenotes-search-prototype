@@ -8,6 +8,7 @@ import { ApplicationInfo } from '../applicationInfo'
 import config from '../config'
 import { HmppsError } from '../interfaces/hmppsError'
 import { CaseNote } from '../interfaces/TypeSearch'
+import { HIGHLIGHT_CLOSE_TAG, HIGHLIGHT_TAG } from '../services/utils/mergeInHighlights'
 
 const production = process.env.NODE_ENV === 'production'
 
@@ -103,15 +104,10 @@ export default function nunjucksSetup(app: express.Express, applicationInfo: App
             value: {
               html: (value as CaseNote['amendments'])
                 .map(amendment => {
-                  const truncatedText =
-                    amendment.additionalNoteText.length > 120
-                      ? amendment.additionalNoteText
-                      : amendment.additionalNoteText
-
                   return `<details class='govuk-details govuk-!-margin-bottom-1'>
                             <summary class='govuk-details__summary'>
                               <span class='govuk-details__summary-text'>
-                                 ${truncatedText}
+                                 ${amendment.additionalNoteText}
                               </span>
                             </summary>
                             <div class='govuk-details__text'>
