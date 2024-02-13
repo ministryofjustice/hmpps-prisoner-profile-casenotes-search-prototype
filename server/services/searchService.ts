@@ -2,6 +2,7 @@
 
 import type SearchClient from '../data/searchClient'
 import { CaseNote, SearchResponse, TypeSearchAggregation } from '../interfaces/TypeSearch'
+import mergeInHighlights, { HIGHLIGHT_TAG } from './utils/mergeInHighlights'
 
 export type SearchTerms = {
   keywords: string
@@ -61,7 +62,7 @@ export default class SearchService {
       },
       size: 3,
       highlight: {
-        pre_tags: ["<em class='search-highlight'>"],
+        pre_tags: [HIGHLIGHT_TAG],
         post_tags: ['</em>'],
         fields: {
           additionalNoteText: {},
@@ -75,15 +76,7 @@ export default class SearchService {
     }
 
     const resp = await this.searchClient.searchCaseNotes<SearchResponse>(query)
-
-    // create new object by converting values of rawRecord.highlight to string
-
-    return resp.hits.hits.map(rawRecord => {
-      const highlights = rawRecord.highlight
-        ? Object.fromEntries(Object.entries(rawRecord.highlight).map(([key, value]) => [key, value[0]]))
-        : {}
-      return { ...rawRecord._source, ...highlights }
-    })
+    return mergeInHighlights(resp)
   }
 
   getFilters(searchTerms: SearchTerms) {
