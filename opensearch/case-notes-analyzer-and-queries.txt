@@ -1,0 +1,367 @@
+
+Overview
+--------
+
+Once you have an OpenSearch cluster instaleld, perform the following steps to configure an analyzer, load data, and perform queries
+
+These queries can be run directly from Postman, but the OpenSearch Dasboard's Dev Tools console is better
+
+1. Create an index with the specified analyzers and field mapping - need to add more fields and remove keyword from text fields
+2. Load a test document in to that index
+3. Perform a search - note the use of nested to query the ammendments and filters for well-defined data such as location, types and dates
+4. If you modify the analyzer you can create a new index and then use a script to copy data from the previous one across
+5. Understand what the case_notes_analyzer will do with document text when you *store* a document in the index .e.g what synonyms does it map to
+6. Understand what the case_notes_search_analyzer will do with search text when you *search* a document in the index - note the use of contractions to handle multi-word synonyms correctly - https://www.elastic.co/guide/en/elasticsearch/guide/current/multi-word-synonyms.html
+
+Some other key points that may be of value:
+
+ - If you search for multiple words in single match, then both words are highlighted as it is an logical OR search
+ - Use kstem for a less aggressive english dictionary-based stemmer - remove plurals
+
+ - Filter at bottom of query in 3 is executed before 'must' query at the top - https://opensearch.org/docs/latest/query-dsl/compound/bool/
+ - Synonyms can be used for prison specifc terms and acronyms/abbreviations
+ - Use synonyms appropriately i.e. not for correcting typos or in place of a fuzzy query, although there may be exceptions to this
+ - Use "updateable": true sot hat we can reload the search analyser when we change synonyms
+ - Cannot use fuzzy with match_phrase - could use an intervals query instead - https://opensearch.org/docs/latest/query-dsl/full-text/intervals/
+ - Intervals in general looks useful for proximity based queries and the order of matching terms (including terms either side of the match).
+
+
+
+Connecting to the Case Notes Search Prototype
+---------------------------------------------
+
+Use the command below to conenct to the OpenSearch instance inside the prototype's namespace, then point your client at port 19200
+
+NAMESPACE=hmpps-prisoner-profile-casenotes-search-prototype && kubectl -n $NAMESPACE port-forward $(kubectl -n $NAMESPACE get pods | grep opensearch-proxy-cloud-platform | grep Running | head -1 | awk '{print $1}') 19200:8080
+
+
+
+1. Create an index with the specified analyzers and field mapping
+-----------------------------------------------------------------
+
+PUT casenotes23
+{
+    "settings": {
+        "analysis": {
+            "analyzer": {
+                "case_notes_analyzer": {
+                    "type": "custom",
+                    "tokenizer": "standard",
+                    "filter": ["asciifolding", "lowercase", "kstem", "case_notes_synonyms_common", "case_notes_synonyms_index", "delimit_words", "kstem", "trim", "remove_single_chars", "unique_tokens"]
+                },
+                "case_notes_search_analyzer": {
+                    "type": "custom",
+                    "tokenizer": "standard",
+                    "filter": ["asciifolding", "lowercase", "kstem", "case_notes_synonyms_common", "case_notes_synonyms_search", "delimit_words", "kstem", "trim", "remove_single_chars", "unique_tokens"]
+                }
+            },
+            "filter": {
+                "delimit_words": {
+                    "type": "word_delimiter_graph",
+                    "preserve_original": true,
+                    "generate_number_parts": false
+                },
+                "remove_single_chars" : {
+                    "type": "length",
+                    "min": 2
+                },
+                "unique_tokens": {
+                    "type": "unique",
+                    "only_on_same_position": true
+                },
+                "case_notes_synonyms_common":{ 
+                  "type":"synonym",
+                  "synonyms": [
+                    "crap, c**p",
+                    "dad, father, pa",
+                    "monther, mum, mom",
+                    "management, mgmt",
+                    "parva", "pava"
+                    ]
+                },"case_notes_synonyms_index":{ 
+                  "type":"synonym",
+                  "synonyms": [ 
+                    "acct, assessment care custody teamwork => acct, assessmentcarecustodyteamwork",
+                    "ddp, desistance disengagment program => ddp, desistancedisengagmentprogram",
+                    "iep, incentive earned privileges => iep, incentiveearnedprivileges, labellingbehaviour",
+                    "mdt, mandatory drug test => mdt, mandatorydrugtest",
+                    "omu, offender managment unit, o.m.u => omu, offendermanagmentunit",
+                    "pp, ppu, public protection unit => pp, ppu, publicprotectionunit",
+                    "sotp, sex offender treatment program => sotp, sexoffendertreatmentprogram",
+                    "uti, under the influence => uti, undertheinfluence",
+                    "sad, upset => sad, upset, labellingmentalhealth"
+                    "selfharm, self-harm, self harm => selfharm, self-harm, selfharm, labellingmentalhealth"
+                    ]
+                },
+                "case_notes_synonyms_search":{ 
+                  "type":"synonym",
+                  "updateable": true,
+                  "synonyms": [ 
+                    "acct, assessment care custody teamwork => assessmentcarecustodyteamwork",
+                    "ddp, desistance disengagment program => desistancedisengagmentprogram",
+                    "iep, incentive earned privileges => incentiveearnedprivileges",
+                    "mdt, mandatory drug test => mandatorydrugtest",
+                    "omu, o.m.u, offender managment unit => offendermanagmentunit",
+                    "pp, ppu, public protection unit => publicprotectionunit",
+                    "sotp, sex offender treatment program => sexoffendertreatmentprogram",
+                    "uti, under the influence => undertheinfluence",
+                    "selfharm, self-harm, self harm => selfharm"
+                    ]
+                }
+              }
+        }
+    },
+    "mappings" : {
+        "properties": {
+            "amendments": {
+                "type": "nested",
+                "properties": {
+                    "additionalNoteText": {
+                        "type": "text",
+                        "analyzer": "case_notes_analyzer",
+                        "search_analyzer": "case_notes_search_analyzer"
+                    },
+                    "authorName": {
+                        "type": "text"
+                    },
+                    "creationDateTime": {
+                        "type": "date"
+                    }
+                }
+            },
+            "authorName": {
+                "fields": {
+                    "keyword": {
+                    "type": "keyword",
+                    "ignore_above": 256
+                    }
+                },
+                "type": "text"
+            },
+            "authorUserId": {
+                "fields": {
+                    "keyword": {
+                    "type": "keyword",
+                    "ignore_above": 256
+                    }
+                },
+                "type": "text"
+            },
+            "caseNoteId": {
+                "fields": {
+                    "keyword": {
+                    "type": "keyword",
+                    "ignore_above": 256
+                    }
+                },
+                "type": "text"
+            },
+            "creationDateTime": {
+                "type": "date"
+            },
+            "eventId": {
+                "type": "long"
+            },
+            "locationId": {
+                "fields": {
+                    "keyword": {
+                    "type": "keyword",
+                    "ignore_above": 256
+                    }
+                },
+                "type": "text"
+            },
+            "occurrenceDateTime": {
+                "type": "date"
+            },
+            "offenderIdentifier": {
+                "fields": {
+                    "keyword": {
+                    "type": "keyword",
+                    "ignore_above": 256
+                    }
+                },
+                "type": "text"
+            },
+            "sensitive": {
+                "type": "boolean"
+            },
+            "source": {
+                "fields": {
+                    "keyword": {
+                    "type": "keyword",
+                    "ignore_above": 256
+                    }
+                },
+                "type": "text"
+            },
+            "subType": {
+                "fields": {
+                    "keyword": {
+                    "type": "keyword",
+                    "ignore_above": 256
+                    }
+                },
+                "type": "text"
+            },
+            "subTypeDescription": {
+                "fields": {
+                    "keyword": {
+                    "type": "keyword",
+                    "ignore_above": 256
+                    }
+                },
+                "type": "text"
+            },
+            "text": {
+                "type": "text",
+                "analyzer": "case_notes_analyzer",
+                "search_analyzer": "case_notes_search_analyzer"
+            },
+            "type": {
+                "fields": {
+                    "keyword": {
+                    "type": "keyword",
+                    "ignore_above": 256
+                    }
+                },
+                "type": "text"
+            },
+            "typeDescription": {
+                "fields": {
+                    "keyword": {
+                    "type": "keyword",
+                    "ignore_above": 256
+                    }
+                },
+                "type": "text"
+            }
+        }
+    }
+}
+
+
+
+2. Load a test document in to that index
+
+PUT casenotes23/_doc/1
+{
+  "caseNoteId": "57033201",
+  "offenderIdentifier": "A8610DZ",
+  "type": "APP",
+  "typeDescription": "Appointment",
+  "subType": "OUTCOME",
+  "subTypeDescription": "Outcome of Schedule",
+  "source": "AUTO",
+  "creationDateTime": "2024-03-19T11:11:17.031266",
+  "occurrenceDateTime": "2024-03-19T11:00:00",
+  "authorName": "Williams, Nick",
+  "authorUserId": "487520",
+  "text": "have arranged and appoinmtne to discuss recent aggresive behaviour and staff abuse. Also some full swear words such as cr1p and sh1t. Also some swear words with one or more asterix f**k, sh*t, c**p.  ",
+  "locationId": "MDI",
+  "eventId": 47033210,
+  "sensitive": false,
+  "amendments": [
+    {
+      "creationDateTime": "2024-03-20T18:06:16",
+      "authorName": "Williams, Nick",
+      "additionalNoteText": "UTI incidents have esclatedto a daily occirance and will lead to MDT for 6 months. Need ACCt involement."
+    },
+    {
+      "creationDateTime": "2024-05-20T18:06:30",
+      "authorName": "Williams, Nick",
+      "additionalNoteText": "John was in good spirits today. He has a new focus in his life and is hoping that this will encourage him to behave and try to reach his goal of release and no future reoffending.Extra text for o.m.u here. He has signed up for a course in education and will be moved from the Seg today to normal location on HB1 "
+    },
+
+    {
+      "creationDateTime": "2024-05-20T18:08:08",
+      "authorName": "Williams, Nick",
+      "additionalNoteText": "Offender admitted to Moorland (HMP & YOI) for reason: Recall From Intermittent Custody from OUTSIDE. Add sad to trigger mental health label."
+    },
+    {
+      "creationDateTime": "2024-05-20T18:08:08",
+      "authorName": "Williams, Nick",
+      "additionalNoteText": "Offender admitted to Moorland (HMP & YOI) for reason: Transfer In from Other Establishment from WANDSWORTH (HMP)."
+    }
+  ]
+}
+
+
+3. Perform a search - note the use of nested to query the ammendments and filters for well-defined data such as location, types and dates
+
+GET casenotes23/_search
+{
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "query_string": {
+            "query": "text: discuss  ",
+            "fuzziness": "AUTO"
+          }
+        },
+        {
+          "nested": {
+            "path" : "amendments",
+            "query": {
+              "query_string" : {
+                "query": "amendments.additionalNoteText: labellingmentalhealth",
+                "fuzziness": "AUTO"
+              }
+            }
+          }
+        }
+      ],
+      "filter": [
+        {"terms": { "type.keyword": ["APP"] }},
+        {"terms": { "subType.keyword": ["OUTCOME"] }},
+        {"terms": { "locationId.keyword": ["MDI", "LEI"] }},
+        {"range": {"creationDateTime": {"gte": "2022-01-01T20:03:12.963",
+                                             "lte": "2025-01-20T20:03:12.963"}}}
+      ]
+    }
+  },
+  "size": 5,
+    "highlight": {
+      "fields": {
+        "text": {},
+        "amendments.additionalNoteText": {}
+      }
+    },
+  "aggregations": {
+    "significant_crime_types": {
+      "significant_text": { "field": "amendments.additionalNoteText" }
+    }
+  }
+
+}
+
+
+
+4. If you modify the analyzer you can create a new index and then use a script to copy data from the previous one across
+
+POST _reindex
+{
+  "source" : { "index" : "casenotes22" },
+  "dest" : { "index" : "casenotes23" }
+}
+
+
+
+5. Understand what the case_notes_analyzer will do with document text when you *store* a document in the index .e.g what synonyms does it map to
+
+GET /casenotes23/_analyze
+{
+  "analyzer" : "case_notes_analyzer",
+  "text" : "ppu"
+}
+
+
+
+6. Understand what the case_notes_search_analyzer will do with search text when you *search* a document in the index - note the use of contractions to handle multi-word synonyms correctly
+
+GET /casenotes23/_analyze
+{
+  "analyzer" : "case_notes_search_analyzer",
+  "text" : "ppu"
+}
